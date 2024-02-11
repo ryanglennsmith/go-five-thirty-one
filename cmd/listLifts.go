@@ -23,38 +23,66 @@ var listLiftsCmd = &cobra.Command{
 	Short: "lists the lifts and their current weights",
 	Long: `TODO: think about weeks?`,
 	Run: func(cmd *cobra.Command, args []string) {
-		listLifts()
+		listLifts(cmd, args)
 	},
 }
+
+var liftsToDisplay []string
 
 func init() {
 	rootCmd.AddCommand(listLiftsCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listLiftsCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listLiftsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// Add flags for specific lifts
+	listLiftsCmd.Flags().StringSliceVarP(&liftsToDisplay, "lifts", "l", nil, "Specify lifts to display (comma-separated)")
 
 
+	// Example: go run main.go list-lifts -lifts=DL,SQ OR go run main.go ll -l OHP,BP
 }
 
-func listLifts() {
+func listLifts(cmd *cobra.Command, args []string) {
+	lifts, err := cmd.Flags().GetStringSlice("lifts")
+	if err != nil {
+		fmt.Println("Error getting lifts:", err)
+		return
+	}
+
+	if len(lifts) > 0 {
+		displaySpecifiedLifts(lifts)
+		return
+	}
+
+	displayAllLifts()
+}
+
+func displayAllLifts() {
 	for lift, oneRM := range LiftData {
 		wc := calculators.NewWeightCalculator(lift, float64(oneRM))
+		displayLift(wc, lift)
+	}
+}
 
-		for _, modifier := range calculators.WeightModifiers {
-			workingSetWeight, err := wc.CalculateWeight(modifier)
-			if err != nil {
-				fmt.Println(err)
-			}
-			var formattedWeight string = fmt.Sprintf("%s - %s: %s\n", lift, modifier.Set, formatWeight(workingSetWeight))
+func displaySpecifiedLifts(lifts []string) {
+	for _, lift := range lifts {
+		lift = strings.ToUpper(lift)
+		oneRM, ok := LiftData[lift]
+		if !ok {
+			fmt.Printf("That ain't a lift: %s\n", lift)
+			continue
+		}
+		wc := calculators.NewWeightCalculator(lift, float64(oneRM))
+		displayLift(wc, lift)
+	}
+}
 
-			fmt.Print(formattedWeight)}
+func displayLift(wc calculators.WeightCalculator, lift string) {
+	
+	for _, modifier := range calculators.WeightModifiers {
+		workingSetWeight, err := wc.CalculateWeight(modifier)
+		if err != nil {
+			fmt.Println(err)
+		}
+		var formattedWeight string = fmt.Sprintf("%s - %s: %s\n", lift, modifier.Set, formatWeight(workingSetWeight))
+		fmt.Print(formattedWeight)
 	}
 }
 

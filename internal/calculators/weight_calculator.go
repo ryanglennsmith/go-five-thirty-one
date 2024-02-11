@@ -41,7 +41,6 @@ func NewWeightCalculator(lift string, oneRM float64) WeightCalculator {
 	return &weightCalculator{
 		Lift: lift,
 		OneRM: oneRM,
-		
 	}
 }
 
