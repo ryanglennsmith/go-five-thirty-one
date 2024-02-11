@@ -2,19 +2,16 @@ package cmd
 
 import (
 	"fmt"
-	"go-five-thirty-one/internal/calculators"
+	"go-five-thirty-one/internal/csv"
 	"strings"
 
 	"github.com/spf13/cobra"
 )
 
-//hardcoded data for now
-var LiftData = map[string]int{
-	"BP": 100,
-	"SQ": 150,
-	"DL": 200,
-	"OHP": 75,
-}
+// this file path will become dynamic with cycle changes
+const path = "./.csv/data.csv"
+
+
 
 // listLiftsCmd represents the list-lifts command
 var listLiftsCmd = &cobra.Command{
@@ -31,7 +28,7 @@ var liftsToDisplay []string
 
 func init() {
 	rootCmd.AddCommand(listLiftsCmd)
-
+	
 	// Add flags for specific lifts
 	listLiftsCmd.Flags().StringSliceVarP(&liftsToDisplay, "lifts", "l", nil, "Specify lifts to display (comma-separated)")
 
@@ -40,6 +37,12 @@ func init() {
 }
 
 func listLifts(cmd *cobra.Command, args []string) {
+	userData, err := csv.ReadData(path)
+	if err != nil {
+		fmt.Println("Error reading data:", err)
+		return
+	}
+	
 	lifts, err := cmd.Flags().GetStringSlice("lifts")
 	if err != nil {
 		fmt.Println("Error getting lifts:", err)
@@ -47,43 +50,53 @@ func listLifts(cmd *cobra.Command, args []string) {
 	}
 
 	if len(lifts) > 0 {
-		displaySpecifiedLifts(lifts)
+		displaySpecifiedLifts(lifts, userData)
 		return
 	}
 
-	displayAllLifts()
+	displayAllLifts(userData)
 }
 
-func displayAllLifts() {
-	for lift, oneRM := range LiftData {
-		wc := calculators.NewWeightCalculator(lift, float64(oneRM))
-		displayLift(wc, lift)
+
+func displayAllLifts(data []csv.LiftData) {
+	for _, obj := range data {
+		displayLift(obj)
 	}
 }
 
-func displaySpecifiedLifts(lifts []string) {
+func displaySpecifiedLifts(lifts []string, data []csv.LiftData) {
 	for _, lift := range lifts {
 		lift = strings.ToUpper(lift)
-		oneRM, ok := LiftData[lift]
-		if !ok {
-			fmt.Printf("That ain't a lift: %s\n", lift)
-			continue
+		
+		var slicedData []csv.LiftData
+		for _, obj := range data {
+			if obj.Lift == lift {
+				slicedData = append(slicedData, obj)
+			}
 		}
-		wc := calculators.NewWeightCalculator(lift, float64(oneRM))
-		displayLift(wc, lift)
+		displayAllLifts(slicedData)
+		
 	}
 }
 
-func displayLift(wc calculators.WeightCalculator, lift string) {
-	
-	for _, modifier := range calculators.WeightModifiers {
-		workingSetWeight, err := wc.CalculateWeight(modifier)
-		if err != nil {
-			fmt.Println(err)
-		}
-		var formattedWeight string = fmt.Sprintf("%s - %s: %s\n", lift, modifier.Set, formatWeight(workingSetWeight))
-		fmt.Print(formattedWeight)
-	}
+
+func displayLift(item csv.LiftData) {
+	// for padding to display evenly
+	liftStrLen := 3
+	weightStrLen := 5
+	formattedLift := fmt.Sprintf("%-*s", liftStrLen, item.Lift)
+	formattedWeight := fmt.Sprintf("%-*s", weightStrLen, formatWeight(item.Weight))
+	fmt.Printf("%s - %s: %s", formattedLift, item.WeekSet, formattedWeight)
+
+if item.Date != "" {
+    fmt.Printf(" | %s", item.Date)
+}
+
+if item.Comments != "" {
+    fmt.Printf(" | %s", item.Comments)
+}
+
+fmt.Println()
 }
 
 func formatWeight(weight float64) string {
