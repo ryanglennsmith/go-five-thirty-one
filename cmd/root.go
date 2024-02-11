@@ -1,5 +1,5 @@
 /*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
+Copyright © 2024 RYAN GLENN SMITH
 
 */
 package cmd
@@ -15,13 +15,19 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "go-five-thirty-one",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "a 5/3/1 calculator and tracker and some other stuff",
+	Long: `	TODO: calculator for 5/3/1
+	TODO: enter/update weights
+	TODO: persist data (csv?)
+	TODO: calculator for 1RM
+	TODO: calculator for plate math
+	TODO: setup for plates and bars
+	TODO: wire with google api for sheets
+	TODO: CRUD tracker for workouts
+	TODO: daily cron service to sync with sheets
+	TODO: macro nutrition stuff
+	TODO: play with ANSI color stuff
+	`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
