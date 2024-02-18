@@ -2,16 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"go-five-thirty-one/config"
 	"go-five-thirty-one/internal/csv"
 	"strings"
 
 	"github.com/spf13/cobra"
 )
-
-// this file path will become dynamic with cycle changes
-const path = "./.csv/data.csv"
-
-
 
 // listLiftsCmd represents the list-lifts command
 var listLiftsCmd = &cobra.Command{
@@ -37,7 +33,9 @@ func init() {
 }
 
 func listLifts(cmd *cobra.Command, args []string) {
-	userData, err := csv.ReadData(path)
+	config := config.GetConfig()
+
+	userData, err := csv.ReadData(config.DataFile)
 	if err != nil {
 		fmt.Println("Error reading data:", err)
 		return

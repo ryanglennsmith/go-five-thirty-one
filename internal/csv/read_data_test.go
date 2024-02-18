@@ -6,7 +6,7 @@ import (
 )
 
 func TestReadData(t *testing.T) {
-	filePath := "../../.csv/data.csv"
+	filePath := "../../.csv/test-data.csv"
 	fmt.Println(filePath)
 	data, err := ReadData(filePath)
 	if err != nil {
