@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go-five-thirty-one/config"
 	googleapi "go-five-thirty-one/internal/google_api"
+	"go-five-thirty-one/internal/util"
 
 	"github.com/spf13/cobra"
 )
@@ -26,14 +27,14 @@ to quickly create a Cobra application.`,
 
 func doUpload() {
 	config := config.GetConfig()
-	
+	done := util.StartLoadingIndicator()
 	driveService := googleapi.NewDriveService(config.SecretsPath)
 	err := driveService.UpdateFile(config.FileId, config.DataFile)
 	if err != nil {
 		fmt.Println("error uploading file:", err)
 		return
 	}
-
+	done <- true
 	fmt.Println("uploaded file")
 }
 func init() {

@@ -32,6 +32,7 @@ func doDownload() {
 	config := config.GetConfig()
 	
 	driveService := googleapi.NewDriveService(config.SecretsPath)
+	
 	err := driveService.DownloadFile(config.FileId, config.DataFile)
 	if err != nil {
 		fmt.Println("error downloading file:", err)

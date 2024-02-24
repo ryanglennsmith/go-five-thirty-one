@@ -3,6 +3,7 @@ package googleapi
 import (
 	"context"
 	"fmt"
+	"go-five-thirty-one/internal/util"
 	"io"
 	"net/http"
 	"os"
@@ -23,6 +24,7 @@ func NewDriveService(secretsPath string) *DriveService {
 	}
 }
 func (ds *DriveService) DownloadFile(fileID string, filePath string) error {
+	done := util.StartLoadingIndicator()
 	driveService, err := ds.getService()
 	if err != nil {
 		return fmt.Errorf("unable to get drive service: %v", err)
@@ -46,7 +48,7 @@ func (ds *DriveService) DownloadFile(fileID string, filePath string) error {
 	if err != nil {
 		return fmt.Errorf("unable to copy file: %v", err)
 	}
-
+	done <- true
 	return nil
 }
 
